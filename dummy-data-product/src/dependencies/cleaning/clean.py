@@ -1,5 +1,6 @@
 import pandas as pd
 import ast
+from datetime import datetime
 
 
 class DataCleaner:
@@ -10,19 +11,27 @@ class DataCleaner:
     def clean_data(self):
         self.df["budget"] = self.df["budget"].apply(self.rupees_to_dollars)
         self.df["city"] = self.df["state"].apply(self.extract_last_word)
+        self.df.drop(["state"], axis=1, inplace=True)
         self.df["project_or_tender"] = self.df["project_or_tender"].apply(
             self.convert_text
         )
 
         # Apply the conversion function to the "timestamp_range" column
-        # self.df["timestamp_range"] = self.df["timestamp_range"].apply(
-        #     self.convert_timestamps
-        # )
+        self.df["timestamp_range"] = self.df["timestamp_range"].apply(
+            self.convert_timestamps
+        )
         self.df["min_max"] = self.df["timestamp_range"].apply(self.min_max)
 
     def rupees_to_dollars(self, amount_rupees):
-        amount_rupees = str(amount_rupees)
-        amount_rupees = amount_rupees.replace(",", "")  # Remove commas
+        if not isinstance(amount_rupees, (int, float, str)):
+            return None
+
+        if isinstance(amount_rupees, str):
+            # Remove commas and check if it's a valid numeric string
+            amount_rupees = amount_rupees.replace(",", "")
+            if not amount_rupees.replace(".", "", 1).isdigit():
+                return None
+
         amount_rupees = float(amount_rupees)  # Convert to float
         amount_dollars = amount_rupees * 0.013  # Convert to dollars
         return f"{amount_dollars:.2f}$"
@@ -40,32 +49,30 @@ class DataCleaner:
         else:
             return text
 
-    # def convert_timestamps(self, timestamp_str):
-    #     try:
-    #         # timestamp_dict = ast.literal_eval(timestamp_str)
-    #         json_str_double_quotes = timestamp_str.replace("'", '"')
-    #         timestamp_dict = json.loads(json_str_double_quotes)
-    #         formatted_dict = {}
-    #         for key, value in timestamp_dict.items():
-    #             if value is None:
-    #                 formatted_dict[key] = None
-    #             else:
-    #                 formatted_dict[key] = pd.to_datetime(
-    #                     value, format="%d-%b-%Y %I:%M %p"
-    #                 ).strftime("%Y-%m-%d %H:%M:%S")
-    #         return formatted_dict
-    #     except Exception as e:
-    #         print(f"Error: {e}")
-    #         return {}
+    def convert_timestamps(self, timestamp):
+        try:
+            if isinstance(timestamp, str):
+                timestamp_dict = ast.literal_eval(timestamp)
+                if isinstance(timestamp_dict, dict):
+                    for key, value in timestamp_dict.items():
+                        if value is not None:
+                            timestamp_dict[key] = datetime.strptime(
+                                value, "%d-%b-%Y %I:%M %p"
+                            ).strftime("%Y-%m-%d %H:%M:%S")
+                    return timestamp_dict
+        except (ValueError, SyntaxError):
+            pass
+        return timestamp
 
     def min_max(self, timestamp_range):
-        timestamp_dict = ast.literal_eval(timestamp_range)
-        non_null_values = [val for val in timestamp_dict.values() if val is not None]
+        if isinstance(timestamp_range, dict):
+            non_null_values = [
+                val for val in timestamp_range.values() if val is not None
+            ]
 
-        if non_null_values:
-            return {"min": min(non_null_values), "max": max(non_null_values)}
-        else:
-            return None
+            if non_null_values:
+                return {"min": min(non_null_values), "max": max(non_null_values)}
+        return None
 
     def save_cleaned_data(self, output_path):
         self.df.to_csv(output_path, index=False)

@@ -1,11 +1,12 @@
-# import dotenv
+import dotenv
+from decouple import config
 import logging
 from datetime import datetime
 from dependencies.cleaning.clean import DataCleaner
 from dependencies.geocoding.geocoder import Geocoder
 from dependencies.scraping.scraper import Scraper
 
-# dotenv.load_dotenv(".env")
+dotenv.load_dotenv(".env")
 logging.basicConfig(level=logging.INFO)
 
 
@@ -28,19 +29,15 @@ def step_2():
 
     # # Step 4: Save data to CSV
     folder_path = r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data"
-    file_name = "scrapped-data-0.csv"
+    file_name = "scraped-data-1.csv"
     full_file_path = f"{folder_path}/{file_name}"
     scraper.save_to_csv(datas, full_file_path)
 
 
 def step_3():
     logging.info("Cleaned Main Data")
-    data_path = (
-        r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\scrapped-data-1.csv"
-    )
-    output_path = (
-        r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\scrapped-cleaned-data.csv"
-    )
+    data_path = config("CLEAN_DATA_PATH")
+    output_path = config("CLEAN_OUPUT_PATH")
 
     # Create an instance of DataCleaner
     cleaner = DataCleaner(data_path)
@@ -54,10 +51,10 @@ def step_3():
 
 def step_4():
     logging.info("Geocoding Cleaned Data")
-    output_path = r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\scrapped-geocoded-data.csv"
+    output_path = r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\scraped-geocoded-data-0.csv"
     geocoder = Geocoder(
-        data_file_path=r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\scrapped-data-1.csv",
-        postal_codes_file_path=r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\csvjson.csv",
+        data_file_path=r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\scraped-cleaned-data.csv",
+        postal_codes_file_path=r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\indian-pincodes.csv",
     )
     geocoder.read_data()
     geocoder.geocode_data()

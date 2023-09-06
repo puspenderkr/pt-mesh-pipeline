@@ -42,7 +42,7 @@ class Geocoder:
         )
 
         # Drop unnecessary columns
-        self.df.drop(["Pincode", "State"], axis=1, inplace=True)
+        self.df.drop(["Pincode"], axis=1, inplace=True)
 
     def map_country_to_region(self, country_name):
         api_url = "https://api.worldbank.org/v2/country"
