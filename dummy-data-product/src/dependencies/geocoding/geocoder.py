@@ -11,12 +11,12 @@ class Geocoder:
         self.df = pd.read_csv(self.data_file_path)
         self.postal_codes_df = pd.read_csv(self.postal_codes_file_path)
         self.postal_codes_df["Pincode"] = (
-            self.postal_codes_df["Pincode"].fillna(0).astype(int)
+            self.postal_codes_df["Pincode"].fillna(0).astype(str)
         )
 
     def geocode_data(self):
         # Convert the "pincode" column data type to integer
-        self.df["pincode"] = self.df["pincode"].fillna(0).astype(int)
+        self.df["pincode"] = self.df["pincode"].fillna(0).astype(str)
 
         # Merge the two DataFrames based on the "Pincode" column
         self.df = self.df.merge(
@@ -24,7 +24,7 @@ class Geocoder:
         )
 
         # Create new columns "Country" and "State"
-        self.df["Country"] = "India"
+        self.df["Country", "City"] = "India"
 
         # Map country to region and add relevant columns
         self.df["country_data"] = self.df["Country"].apply(

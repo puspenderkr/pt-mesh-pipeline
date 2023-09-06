@@ -53,7 +53,7 @@ def step_4():
     logging.info("Geocoding Cleaned Data")
     output_path = r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\scraped-geocoded-data-0.csv"
     geocoder = Geocoder(
-        data_file_path=r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\scraped-cleaned-data.csv",
+        data_file_path=r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\scraped-cleaned-data-0.csv",
         postal_codes_file_path=r"C:\Users\derav\Downloads\pt-mesh-pipeline-main\data\indian-pincodes.csv",
     )
     geocoder.read_data()
